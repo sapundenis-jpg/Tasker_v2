@@ -1,0 +1,16 @@
+{
+  "name": "focusflow-push-server-example",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "keys": "node -e \"import('web-push').then(w=>console.log(w.default.generateVAPIDKeys()))\""
+  },
+  "dependencies": {
+    "cors": "latest",
+    "dotenv": "latest",
+    "express": "latest",
+    "web-push": "latest"
+  }
+}

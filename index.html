@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#202223" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="FocusFlow" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>FocusFlow — локальный недельный план</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div class="hero-meta">
+        <div class="badge-row">
+          <span class="device-tag">FF-07</span>
+          <span class="device-tag subtle">WEB / LOCAL</span>
+          <span class="device-tag subtle">RU PARSER</span>
+          <span class="device-tag subtle">SMART PLAN</span>
+          <span class="device-tag subtle">PUSH READY</span>
+        </div>
+        <p class="eyebrow">локальный планировщик · PWA v0.7</p>
+        <h1>FocusFlow</h1>
+        <p class="hero-text">Терминальный mobile-first планировщик: тёмная база, зелёные экранчики, пиксельная эстетика, темы и умная разгрузка.</p>
+      </div>
+      <div class="hero-actions">
+        <div class="theme-switch" aria-label="Тема интерфейса">
+          <button class="theme-chip" data-theme-choice="dark">Dark</button>
+          <button class="theme-chip" data-theme-choice="retro">Retro</button>
+          <button class="theme-chip" data-theme-choice="minimal">Minimal</button>
+        </div>
+        <button id="installBtn" class="secondary hidden">Установить</button>
+        <button id="notifyBtn" class="secondary">Напоминания</button>
+      </div>
+    </header>
+
+    <nav class="mobile-nav" aria-label="Быстрая навигация">
+      <a href="#todayPanel">Сегодня</a>
+      <a href="#inputPanel">Добавить</a>
+      <a href="#weekPanel">Неделя</a>
+      <a href="#backlogPanel">Задачи</a>
+      <a href="#plannerPanel">Анализ</a>
+    </nav>
+
+    <main class="layout">
+      <section id="inputPanel" class="panel input-panel">
+        <div class="panel-title-row">
+          <div>
+            <p class="eyebrow">входящий поток</p>
+            <h2>Голос / текст</h2>
+          </div>
+          <button id="voiceBtn" class="mic-button" title="Наговорить задачу">🎙️</button>
+        </div>
+
+        <textarea id="captureText" rows="7" placeholder="Например: завтра в 15:30 созвон с клиентом на час, до пятницы подготовить презентацию на 2 часа, в субботу утром придумать концепцию клипа, не ставь сложное вечером — я устал"></textarea>
+
+        <div class="chip-row">
+          <span class="hint-chip">"завтра в 15:30 созвон"</span>
+          <span class="hint-chip">"до пятницы на 2 часа"</span>
+          <span class="hint-chip">"после обеда"</span>
+          <span class="hint-chip">"первая половина дня"</span>
+          <span class="hint-chip">"если устану — перенеси"</span>
+        </div>
+
+        <div class="button-row">
+          <button id="parseBtn" class="primary">Разобрать и добавить</button>
+          <button id="clearInputBtn" class="ghost">Очистить</button>
+        </div>
+        <p id="speechStatus" class="muted small">Говори свободно: дедлайн, время, длительность и приоритет можно указывать обычным русским языком.</p>
+        <div id="parseFeedback" class="parse-feedback muted small"></div>
+      </section>
+
+      <section id="wellbeingPanel" class="panel wellbeing-panel">
+        <p class="eyebrow">состояние сегодня</p>
+        <h2>Самочувствие</h2>
+        <div class="slider-row">
+          <label for="energyRange">Энергия <strong id="energyValue">3</strong>/5</label>
+          <input id="energyRange" type="range" min="1" max="5" value="3" />
+        </div>
+        <div class="slider-row">
+          <label for="stressRange">Стресс <strong id="stressValue">3</strong>/5</label>
+          <input id="stressRange" type="range" min="1" max="5" value="3" />
+        </div>
+        <div class="slider-row">
+          <label for="sleepRange">Сон <strong id="sleepValue">3</strong>/5</label>
+          <input id="sleepRange" type="range" min="1" max="5" value="3" />
+        </div>
+        <div id="capacityCard" class="capacity-card"></div>
+        <div class="button-row">
+          <button id="rescheduleBtn" class="primary">Пересобрать неделю</button>
+          <button id="resetDemoBtn" class="ghost danger">Стереть всё</button>
+        </div>
+      </section>
+
+      <section id="todayPanel" class="panel today-panel">
+        <div class="panel-title-row wrap">
+          <div>
+            <p class="eyebrow">фокус</p>
+            <h2>Сегодня</h2>
+          </div>
+          <div class="button-row compact">
+            <button id="planTodayBtn" class="secondary">Собрать день</button>
+          </div>
+        </div>
+        <div id="todaySummary" class="today-summary"></div>
+        <div id="todayList" class="today-list"></div>
+      </section>
+
+      <section id="plannerPanel" class="panel planner-panel">
+        <div class="panel-title-row wrap">
+          <div>
+            <p class="eyebrow">ассистент-планировщик</p>
+            <h2>Что не так с неделей?</h2>
+          </div>
+          <div class="button-row compact">
+            <button id="analyzeBtn" class="secondary">Анализ</button>
+            <button id="reliefBtn" class="primary">Разгрузить</button>
+          </div>
+        </div>
+        <div id="plannerOutput" class="planner-output"></div>
+        <div class="button-row compact planner-actions">
+          <button id="gentleTodayBtn" class="secondary">Щадящий день</button>
+          <button id="clearManualBtn" class="ghost">Сбросить переносы</button>
+          <button id="icsBtn" class="secondary">Экспорт .ics</button>
+        </div>
+      </section>
+
+      <section class="panel push-panel">
+        <div class="panel-title-row wrap">
+          <div>
+            <p class="eyebrow">фоновые напоминания</p>
+            <h2>Push-готовность</h2>
+          </div>
+          <div class="button-row compact"><button id="pushCheckBtn" class="secondary">Проверить</button><button id="pushConnectBtn" class="primary">Подключить</button></div>
+        </div>
+        <div id="pushStatus" class="push-status"></div>
+        <p class="muted small">Без маленького сервера приложение не может само просыпаться закрытым. В архиве есть пример <code>push-server-example</code> для будущих настоящих фоновых уведомлений.</p>
+      </section>
+
+      <section class="panel install-panel">
+        <p class="eyebrow">iphone</p>
+        <h2>Как поставить</h2>
+        <ol class="install-steps">
+          <li>Опубликуй папку приложения на HTTPS: Netlify, GitHub Pages, Cloudflare Pages или свой домен.</li>
+          <li>Открой ссылку на iPhone в Safari.</li>
+          <li>Нажми кнопку «Поделиться» и выбери «На экран “Домой”».</li>
+          <li>Назови приложение FocusFlow и нажми «Добавить».</li>
+          <li>Открой уже с иконки на домашнем экране и нажми «Напоминания».</li>
+        </ol>
+      </section>
+
+      <section id="weekPanel" class="panel week-panel">
+        <div class="panel-title-row wrap">
+          <div>
+            <p class="eyebrow">расписание</p>
+            <h2 id="weekTitle">Эта неделя</h2>
+          </div>
+          <div class="button-row compact">
+            <button id="prevWeekBtn" class="secondary">←</button>
+            <button id="todayWeekBtn" class="secondary">Сегодня</button>
+            <button id="nextWeekBtn" class="secondary">→</button>
+          </div>
+        </div>
+        <div id="weekDayTabs" class="week-day-tabs"></div>
+        <p class="muted small drag-hint">На телефоне дни идут удобным списком. На ПК карточки можно перетаскивать между днями; переносы сохраняются локально.</p>
+        <div id="weekGrid" class="week-grid"></div>
+      </section>
+
+      <section id="backlogPanel" class="panel backlog-panel">
+        <div class="panel-title-row wrap">
+          <div>
+            <p class="eyebrow">задачи</p>
+            <h2>Бэклог</h2>
+          </div>
+          <div class="button-row compact">
+            <button id="exportBtn" class="secondary">Экспорт</button>
+            <label class="secondary file-label">Импорт<input id="importInput" type="file" accept="application/json" /></label>
+          </div>
+        </div>
+        <div id="taskList" class="task-list"></div>
+      </section>
+
+      <section id="helperPanel" class="panel helper-panel">
+        <p class="eyebrow">помощник</p>
+        <h2>Разобрать сложную задачу</h2>
+        <select id="helperTaskSelect"></select>
+        <button id="helpBtn" class="primary full">Дать план решения</button>
+        <div id="helperOutput" class="helper-output"></div>
+      </section>
+    </main>
+  </div>
+
+  <template id="taskTemplate">
+    <article class="task-card">
+      <div class="task-main">
+        <label class="check-wrap"><input type="checkbox" class="task-done" /><span></span></label>
+        <div>
+          <h3 class="task-title"></h3>
+          <p class="task-meta"></p>
+          <p class="task-notes"></p>
+        </div>
+      </div>
+      <div class="task-actions">
+        <button class="tiny task-edit">Изм.</button>
+        <button class="tiny task-delete">Удалить</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
